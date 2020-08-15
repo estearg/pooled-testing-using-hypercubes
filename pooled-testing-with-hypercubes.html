@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		
+		<!-- Tabs style -->
+		<meta itemprop="Pestañas hechas como enseña " content="https://www.w3schools.com/howto/howto_js_tabs.asp">
+		<style>
+			.tab {
+				background-color: lightblue;
+			}
+			.tab button {
+				background-color: inherit;
+				cursor: pointer;
+				transition: 0.3s;
+			}
+			.tab button:hover {
+				background-color: blue;
+			}
+			.tab button.active {
+				background-color: cyan;
+			}
+			.tabcontent {
+				display: none;
+				border-top: none;
+			}
+		</style>
+
+		<!-- Languages menu style -->
+		<style>
+			.language-menu {
+				float: right;
+				background-color: lightpink;
+			}
+			.language-menu button {
+				background-color: inherit;
+				cursor: pointer;
+			}
+			.language-menu button:hover {
+				background-color: lightsalmon;
+			}
+			.language-menu button.active {
+				background-color: lightcoral;
+			}
+		</style>
+
+		<script>
+			/*    
+			@licstart  The following is the entire license notice for the 
+			JavaScript code in this page.
+
+			pooled-testing-with-hypercubes.html - Pooled testing assitant tools
+			
+			Written in 2020 by Esteban Lucchesi
+			
+			This is free and unencumbered software released into the public domain.
+
+			Anyone is free to copy, modify, publish, use, compile, sell, or
+			distribute this software, either in source code form or as a compiled
+			binary, for any purpose, commercial or non-commercial, and by any
+			means.
+			
+			In jurisdictions that recognize copyright laws, the author or authors
+			of this software dedicate any and all copyright interest in the
+			software to the public domain. We make this dedication for the benefit
+			of the public at large and to the detriment of our heirs and
+			successors. We intend this dedication to be an overt act of
+			relinquishment in perpetuity of all present and future rights to this
+			software under copyright law.
+			
+			THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+			EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+			MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+			IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+			OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+			ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+			OTHER DEALINGS IN THE SOFTWARE.
+			
+			For more information, please refer to <http://unlicense.org/>
+
+			@licend  The above is the entire license notice
+			for the JavaScript code in this page.
+			*/
+		</script>
+	</head>
+
+	<body>
+		<div class="language-menu">
+			<button class="language-sel" id="spaBtn" onclick="setLang(event, 'spanish')">Español</button>
+			<button class="language-sel" id="engBtn" onclick="setLang(event, 'english')">English</button>
+		</div>
+
+		<h1 class="spanish">Análisis con mezcla de muestras usando hipercubos</h1><h1 class="english">Pooled testing using hypercubes</h1>
+		
+		<h2 class="spanish">Tarea</h2><h2 class="english">Task</h2>
+		<p class="spanish">Analizar muestras de <i>N</i> individuos, cuando la prevalencia es baja, en el menor tiempo posible sin recurrir a instrumentos de diagnóstico adicionales.</p>
+		<p class="english">To test samples from <i>N</i> individuals, at low prevalence, in the shortest possible time without extra test equipment.</p>
+
+		<h2 class="spanish">Estrategia</h2><h2 class="english">Strategy</h2>
+		<blockquote class="english" cite="https://doi.org/10.1101/2020.05.02.20087924" style="background-color: khaki;">
+		We summarize the algorithm as follows:
+		<ol type="i">
+			<li>For a given initial estimate of the prevalence <i>p</i>, select the group size <i>N</i> to be the optimal power of 3, discussed below. Test the whole sample to see whether one or more infected individuals are present. A negative test indicates everyone in the group is clear of infection.</li>
+			<li>If the test is positive, run one round of testing according to the hypercube algorithm with <i>L</i> = 3. The distribution of results for the <i>LD</i> slices should, for large <i>N</i>, accurately indicate the number <i>m</i> of infected individuals, with many consistency checks including a new estimate of the prevalence. If <i>m=1</i>, the infected individual is immediately identified.</li>
+			<li>If <i>m = 2</i>, select a principal direction in which two slices are positive. Take one of these, itself a hypercube of dimension <i>D</i> − 1, and run the hypercube algorithm again. The coordinates of the corresponding infected individual are then uniquely identified, and those of the second infected individual are inferred by elimination.</li>
+			<li>If <i>m</i> > 2, select a principal direction in which all three slices are positive. Taking one of these, run the hypercube algorithm again. If that slice contains one infected individual, it is immediately identified. If the slice contains 2 or 3 infected individuals, their coordinates are discovered in 1 or 2 additional hypercube runs. The last infected individual is found by elimination. So, for <i>m</i> = 1, 2 or 3, only <i>m</i> runs are needed.</li>
+			<li>For <i>m</i> > 3, it is an exercise in combinatorics to work out the expected number of runs. This turns out to be a number slightly higher than <i>m</i>. The corrections to <i>m</i> for <i>m</i> = 4, 5, 6 are given in Appendix B. For reasons given there, these corrections turn out to be relatively unimportant.</li>
+		</ol>
+		<footer>L. Mutesa et at., <cite>A strategy for finding people infected with SARS-CoV-2: optimizing pooled testing at low prevalence</cite>, pp. 4-5, May 19, 2020, <a href="https://doi.org/10.1101/2020.05.02.20087924">https://doi.org/10.1101/2020.05.02.20087924</a>.</footer>
+		</blockquote>
+
+		<blockquote class="spanish" cite="https://doi.org/10.1101/2020.05.02.20087924" style="background-color: khaki;">
+		Resumimos el algoritmo de la manera siguiente:
+		<ol type="i">
+			<li>Dada una estimación inicial de la prevalencia <i>p</i>, seleccionar el tamaño del grupo <i>N</i> para que sea la potencia de 3 óptima, según se discute más abajo. Analizar el grupo entero para ver si hay algún individuo infectado. Un resultado negativo indica que ningún individuo del grupo está infectado.</li>
+			<li>Si el resultado es positivo, hacer una ronda de ensayos o análisis de acuerdo al algoritmo del hipercubo con <i>L</i> = 3. La distribución de resultados de las <i>LD</i> tajadas debería, para <i>N</i> grande, indicar con exactitud la cantidad <i>m</i> de individuos infectados, con muchas pruebas de consistencia incluyendo una nueva estimación de la prevalencia. Si <i>m</i> = 1, el individuo infectado es identificado inmediatamente.</li>
+			<li>Si <i>m</i> = 2, elegir una dirección principal en la cual dos tajadas son positivas. Tomar una de estas, que es a su vez un hipercubo de <i>D</i> - 1 dimensiones, y ejecutar el algoritmo del hipercubo nuevamente. Las coordenadas del individuo infectado son entonces identificadas unívocamente, y las del otro individuo infectado se infieren por eliminación.</li>
+			<li>Si <i>m</i> > 2, elegir una dirección principal en la cual las tres tajadas son positivas. Tomando una de estas, ejecutar el algoritmo del hipercubo nuevamente. Si la tajada contiene solo un individuo infectado, es identificado inmediatamente. Si contiene 2 o 3 individuos infectados, sus coordenadas se descubren en 1 o 2 ejecuciones adicionales del algoritmo del hipercubo. El último individuo infectado se halla por eliminación. Entonces, para <i>m</i> = 1, 2 o 3, solo hace falta ejecutar el algoritmo <i>m</i> veces.</li>
+			<li>Para <i>m</i> > 3, la cantidad de veces que hay que ejecutar el algoritmo es un ejercicio de combinatoria. Esta cantidad resulta un número levemente mayor que <i>m</i>. Las correcciones para <i>m</i> = 4, 5, 6 se dan en el apéndice B. Por las razones dadas allí, estas correcciones resultan relativamente insignificantes.</li>
+		</ol>
+		<footer>L. Mutesa et at., <cite>A strategy for finding people infected with SARS-CoV-2: optimizing pooled testing at low prevalence</cite> (Una estrategia para hallar gente infectada con SARS-CoV-2: optimizando los análisis con muestras mezcladas cuando la prevalencia es baja), pp. 4-5, May 19, 2020, <a href="https://doi.org/10.1101/2020.05.02.20087924">https://doi.org/10.1101/2020.05.02.20087924</a>.</footer>
+		</blockquote>
+		
+		<h3 class="spanish">Observaciones</h3><h3 class="english">Notes</h3>
+		<p class="spanish">La estrategia es útil cuando <i>p</i> es cercana a 0.01 (1 %). Para valores mayores de <i>p</i>, la cantidad de individuos que minimiza la cantidad de análisis, <i>N<sub>opt</sub></i>, es muy baja. Por ejemplo si <i>p</i> = 0.04 (4 %), es <i>N<sub>opt</sub></i> = 8.75, y un algoritmo del hipercubo implementado con <i>N</i> = 9, <i>D</i> = 2 y <i>L</i> = 3, requiere realizar 6 análisis (⅔ de <i>N</i>). En cambio, cuando <i>p</i> = 0.01 (1 %), es <i>N<sub>opt</sub></i> = 35, y el algoritmo del hipercubo con <i>N</i> = 27, <i>D</i> = 3 y <i>L</i> = 3, requiere solamente 9 análisis (⅓ de <i>N</i>). La ventaja aumenta a medida que <i>p</i> disminuye. Por ejemplo, si se estima que 1 ‰ de la población está infectada (<i>p</i> = 0.001), se la puede analizar de a grupos de 243 individuos, con solo 15 análisis por grupo, con muy baja probabilidad de que haga falta algún análisis extra para identificar los infectados.</p>
+		<p class="spanish">La cantidad de análisis se minimiza, para cualquier valor de <i>N</i>, cuando <i>L</i> = 3.</p>
+		<p class="english">The strategy is useful when <i>p</i> is near 0.01 (1 %). For greater <i>p</i> values, the number of individuals that minimizes the number of tests per individual, <i>N<sub>opt</sub></i>, is very low. For example, if <i>p</i> = 0.04 (4 %), <i>N<sub>opt</sub></i> = 8.75, and a hypercube algorithm using <i>N</i> = 9, <i>D</i> = 2 and <i>L</i> = 3, requires 6 tests (⅔ of <i>N</i>). In contrast, when <i>p</i> = 0.01 (1 %), <i>N<sub>opt</sub></i> = 35, and a hypercube algorithm with <i>N</i> = 27, <i>D</i> = 3 and <i>L</i> = 3, requires only 9 tests (⅓ of <i>N</i>). The advantage gets even greater as <i>p</i> decreases. For example, if it is estimated that 1 ‰ of the population is infected (<i>p</i> = 0.001), it can be tested in groups of 243 individuals, with only 15 tests per group, with a very low probability that extra tests will be required to identify the infected individuals.</p>
+		<p class="english">The number of tests reaches its minimum, for every <i>N</i> value, when <i>L</i> = 3.</p>
+		
+		<h3 class="spanish">Algoritmo del hipercubo</h3><h3 class="english">Hypercube algorithm</h3>
+
+		<h4 class="spanish">Cantidades y símbolos</h4><h4 class="english">Quantities and symbols</h4>
+		<ul>
+			<li><span class="spanish">Prevalencia</span><span class="english">Prevalence</span>: <i>p</i></li>
+			<li><span class="spanish">Cantidad de individuos</span><span class="english">Number of individuals</span>: <i>N</i></li>
+			<li><span class="spanish">Cantidad de individuos que minimiza la cantidad de análisis por individuo</span><span class="english">Number of individuals that minimizes the number of tests per individual</span>: <i>N<sub>opt</sub></i></li>
+			<li><span class="spanish">Cantidad total de análisis</span><span class="english">Total number of tests</span>: <i>L * D</i></li>
+			<li><span class="spanish">Cantidad de submuestras de una muestra individual</span><span class="english">Number of subsamples from an individual sample</span>: <i>D</i></li>
+			<li><span class="spanish">Cantidad de submuestras por análisis</span><span class="english">Number of subsamples per test</span>: <i>n<sub>S</sub></i></li>
+		</ul>
+
+		<h4 class="spanish">Ecuaciones</h4><h4 class="english">Equations</h4>
+			<math xmlns="http://www.w3.org/1998/Math/MathML">
+				<mrow>
+					<mtable>
+						<mtr>
+							<mtd>
+								<mrow>
+									<mi>N</mi>
+									<mo stretchy="false">=</mo>
+									<msup>
+										<mi>L</mi>
+										<mi>D</mi>
+									</msup>
+								</mrow>
+							</mtd>
+						</mtr>
+						<mtr>
+							<mtd>
+								<mrow>
+									<msub>
+										<mi>n</mi>
+										<mi>S</mi>
+									</msub>
+									<mo stretchy="false">=</mo>
+									<mfrac>
+										<mi>N</mi>
+										<mi>L</mi>
+									</mfrac>
+								</mrow>
+							</mtd>
+						</mtr>
+						<mtr>
+							<mtd>
+								<mrow>
+									<msub>
+										<mi>N</mi>
+										<mi mathvariant="italic">opt</mi>
+									</msub>
+									<mo stretchy="false">≈</mo>
+									<mfrac>
+										<mn>0.35</mn>
+										<mi>p</mi>
+									</mfrac>
+								</mrow>
+							</mtd>
+						</mtr>
+					</mtable>
+				</mrow>
+			</math>
+			
+		<h4 class="spanish">Implementación</h4><h4 class="english">Implementation</h4>
+		<p class="spanish">Cada individuo es representado por un número de <i>D</i> cifras en base <i>L</i>. Cada cifra, junto con su posición, determina un análisis que contiene una submuestra del individuo. Tanto los individuos como los análisis se numeran a partir de 1. En cada dirección principal del hipercubo hay <i>L</i> análisis numerados en forma consecutiva hasta un múltiplo de <i>L</i> (por ejemplo si <i>L</i> = 3, los análisis 4, 5 y 6 están en una dirección principal del hipercubo).</p>
+		<p class="english">Each individual is represented by a number of <i>D</i> digits in base <i>L</i>. Each digit, together with its position, determines a test that includes a subsample of the individual. Individuals and tests are numbered from 1. In each principal direction of the hypercube, there are <i>L</i> tests numbered consecutively up to a multiple of <i>L</i> (e. g., for <i>L</i> = 3, tests 4, 5 and 6 lie on a principal direction.)</p>
+		
+		<p><i>p</i> [0-1]: <input type="number" id="pnumber" min="0" step="any" max="1" onchange="computeNopt()"> <i>N<sub>opt</sub></i>: <span class="langFromJS" id="Nopt_span"></span></p>
+		<p><i>N</i>: <input type="number" id="Nnumber" min="1" step="1" onchange="computeLetc()"></p>
+		<p><i>D</i>: <input type="number" id="Dnumber" min="1" step="1" onchange="computeLetc()"></p>
+		<p><i>L</i>: <span class="langFromJS" id="Lspan"></span></p>
+
+		<!-- Tab links -->
+		<div class="tab">
+			<button id="tabBtn1" class="tablinks" onclick="openTab(event, '1')"><span class="spanish">Pestaña</span><span class="english">Tab</span> 1</button>
+			<button id="tabBtn2" class="tablinks" onclick="openTab(event, '2')"><span class="spanish">Pestaña</span><span class="english">Tab</span> 2</button>
+			<button id="tabBtn3" class="tablinks" onclick="openTab(event, '3')"><span class="spanish">Pestaña</span><span class="english">Tab</span> 3</button>
+		</div>
+
+		<!-- Tab content -->
+		<div class="tabcontent" id="1">
+			<h5 class="spanish">Análisis que incluyen submuestras de un individuo dado</h5><h5 class="english">Tests that include subsamples of a given individual</h5>
+			<p><span class="spanish">Individuo</span><span class="english">Individual</span>: <input type="number" id="Inumber" min="1" step="1" onchange="listTests()"></p>
+			<p><span class="spanish">Análisis</span><span class="english">Tests</span>:</p>
+			<section id="testsSection"></section>
+		</div>
+		<div class="tabcontent" id="2">
+			<h5 class="spanish">Individuos cuyas submuestras componen un análisis dado</h5><h5 class="english">Individuals whose subsamples go into a given test</h5>
+			<p><span class="spanish">Análisis</span><span class="english">Test</span>: <input type="number" id="testNumbernumber" min="1" step="1" onchange="listIndividuals()"></p>
+			<section id="individualsSection"></section>
+		</div>
+		<div class="tabcontent" id="3">
+			<h5 class="spanish">Individuo correspondiente a un conjunto dado de análisis</h5><h5 class="english">Individual corresponding to a given set of tests</h5>
+			<section id="testssetSection"></section>
+			<button onclick="getIndividual()"><span class="spanish">Hallar</span><span class="english">Get</span></button> <span class="spanish">Individuo</span><span class="english">Individual</span>: <span id="individualSpan"></span>
+		</div>
+		
+		<!-- Footer -->
+		<hr></hr>
+		<small>
+			<blockquote class="english" cite="https://doi.org/10.1086/224129">
+				When Person and Other interact in a situation in which there are several possible outcomes, not all equally favorable to both, Person may prefer an outcome in which the relative advantage of his welfare over Other's is the greatest (competition), or an outcome in which the sum of his welfare and that of Other is the greatest (cooperation), or simply that outcome in which his own welfare is the greatest, irrespective of Other's (individualism).
+				<footer>Sawyer, J.: <cite>The Altruism Scale: A Measure of Co-operative, Individualistic, and Competitive Interpersonal Orientation</cite>, <i>American Journal of Sociology</i>, Vol. 71, No. 4 (Jan., 1966), pp. 407-416. <a href="https://www.journals.uchicago.edu/doi/abs/10.1086/224129">https://www.journals.uchicago.edu/doi/abs/10.1086/224129</a></footer>
+			</blockquote>
+			<blockquote class="spanish" cite="https://doi.org/10.1086/224129">
+				Cuando Persona y Otro interactúan en una situación de la que se pueden seguir varios resultados, no todos ellos igualmente favorables a ambos, Persona puede preferir un resultado en el cual la ventaja relativa de su bienestar con respecto al de Otro es la mayor (competencia), o un resultado en el cual la suma de su bienestar y el de Otro es la mayor (cooperación), o simplemente aquel resultado en el cual su propio bienestar es el mayor, independientemente del de Otro (individualismo).
+				<footer>Sawyer, J.: <cite>The Altruism Scale: A Measure of Co-operative, Individualistic, and Competitive Interpersonal Orientation</cite> (La escala de altruismo: una medida de la orientación interpersonal cooperativa, individualista, y competitiva), <i>American Journal of Sociology</i>, vol. 71, nro. 4 (enero 1966), pp. 407-416.</footer>
+			</blockquote>
+		</small>
+		</p>
+
+		<h2>Licencia / License</h2>
+		<p>
+		pooled-testing-with-hypercubes.html - Pooled testing using hypercubes
+		</p><p>
+		Written in 2020 by Esteban Lucchesi
+		</p><p>
+		This is free and unencumbered software released into the public domain.
+		</p><p>
+		Anyone is free to copy, modify, publish, use, compile, sell, or
+		distribute this software, either in source code form or as a compiled
+		binary, for any purpose, commercial or non-commercial, and by any
+		means.
+		</p><p>
+		In jurisdictions that recognize copyright laws, the author or authors
+		of this software dedicate any and all copyright interest in the
+		software to the public domain. We make this dedication for the benefit
+		of the public at large and to the detriment of our heirs and
+		successors. We intend this dedication to be an overt act of
+		relinquishment in perpetuity of all present and future rights to this
+		software under copyright law.
+		</p><p>
+		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+		EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+		MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+		IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+		OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+		ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+		OTHER DEALINGS IN THE SOFTWARE.
+		</p>
+		
+		<!-- Javascript -->
+		<script>
+			// Declare variables
+			var NnumberElem,
+				DnumberElem,
+				pnumberElem,
+				testNumbernumberElem,
+				InumberElem,
+				Nopt_spanElem,
+				LspanElem,
+				individualSpanElem,
+				individualsSectionElem,
+				testsSectionElem,
+				testssetSectionElem,
+				N,
+				D,
+				L,
+				testNumber,
+				curLang;
+			
+			// Initialize variables, set language
+			window.onload = function() {
+				// Get elements
+				pnumberElem = document.getElementById("pnumber");
+				NnumberElem = document.getElementById("Nnumber");
+				DnumberElem = document.getElementById("Dnumber");
+				LspanElem = document.getElementById("Lspan");
+				Nopt_spanElem = document.getElementById("Nopt_span");
+				InumberElem = document.getElementById("Inumber");
+				testsSectionElem = document.getElementById("testsSection");
+				testssetSectionElem = document.getElementById("testssetSection");
+				testNumbernumberElem = document.getElementById("testNumbernumber");
+				individualsSectionElem = document.getElementById("individualsSection");
+				individualSpanElem = document.getElementById("individualSpan");
+			
+				// Set language
+				document.getElementById("engBtn").click();
+				// Open a tab
+				document.getElementById("tabBtn2").click();
+			}
+			
+			function openTab(event, tabName) {
+				var i, tabcontent, tablinks;
+				
+				// Hide all tabs
+				tabcontent = document.getElementsByClassName("tabcontent");
+				for (i = 0; i < tabcontent.length; i++) {
+					tabcontent[i].style.display = "none";
+				}
+				// Set all buttons as inactive
+				tablinks = document.getElementsByClassName("tablinks");
+				for (i = 0; i < tablinks.length; i++) {
+					tablinks[i].className = tablinks[i].className.replace("active", "");
+				}
+				
+				// Show the tab and set it as active
+				document.getElementById(tabName).style.display = "block";
+				event.currentTarget.className += " active"; // note the space preceding 'active'
+			}
+
+			function computeNopt() {
+				p = parseFloat(pnumberElem.value);
+				if (isFinite(p)) {
+					if ((p >= 1) || (p <= 0)) {
+						if (curLang == "english") {
+							Nopt_spanElem.innerHTML = "<i>p</i> range: (0...1)";
+						}
+						if (curLang == "spanish") {
+							Nopt_spanElem.innerHTML = "Rango de <i>p</i>: (0...1)";
+						}
+					} else {
+						exact_int_Nopt = Math.round(0.35 / p);
+						Dopt = Math.round(Math.log(exact_int_Nopt) / Math.log(3));
+						Nopt_Lopt = Math.pow(3, Dopt);
+						Nopt_spanElem.innerHTML = exact_int_Nopt + ". ";
+						if (curLang == "english") {
+							Nopt_spanElem.innerHTML += "Parameters for ";
+						}
+						if (curLang == "spanish") {
+							Nopt_spanElem.innerHTML += "Parámetros para ";
+						}
+						Nopt_spanElem.innerHTML += 	"<i>L</i> = 3: <i>D</i> = " + Dopt + ", <i>N</i> = " + Nopt_Lopt;
+					}
+				}
+			}
+			
+			function computeLetc() {
+				N = parseInt(NnumberElem.value);
+				D = parseInt(DnumberElem.value);
+				if (N != 0 && D != 0) {
+					L = Math.pow(N, 1 / D);
+					if (Number.isInteger(L)) {
+						LspanElem.innerHTML = L;
+						InumberElem.setAttribute("max", N);
+						testNumbernumberElem.setAttribute("max", D * L);
+					} else {
+						if (isFinite(L)) {
+							if (curLang == "english") {
+								LspanElem.innerHTML = "N is not the D-th power of an integer. ";
+							}
+							if (curLang == "spanish") {
+								LspanElem.innerHTML = "N no es D-ésima potencia de un entero. ";
+							}
+							LspanElem.innerHTML += Math.round(L) + "<sup>" + D + "</sup> = " + Math.pow(Math.round(L), D)
+						}
+					}
+				}
+				// Fill the tests set section with D inputs of type number (min=1, step=1, max=D*L) -one for each principal direction
+				var sectionContent = "";
+				testssetSectionElem.innerHTML = sectionContent;
+				for (var i = 0; i < D; i++) {
+					sectionContent += "<input type='number' id='test" + i + "' min='" + (i * L + 1) + "' step='1' max='" + ((i + 1) * L) + "'>";
+					if (i != (D - 1)) {
+						sectionContent += "<br/>";
+					}
+				}
+				testssetSectionElem.innerHTML = sectionContent;
+			}
+			
+			function listTests() {
+				// Clear section
+				var sectionContent = "";
+				testsSectionElem.innerHTML = sectionContent;
+				I = parseInt(InumberElem.value);
+				// Subtract 1 to start counting from 0
+				var x = I - 1;
+				var test_number = [];
+				for (var i = 0; i < D; i++) {
+					test_number[i] = ((x % L) + 1) + L * (D - (i + 1));
+					x = Math.floor(x / L);
+				}
+				// Fill section
+				for (var i = (D - 1); i > 0; i--) {
+					sectionContent += test_number[i].toString(10) + "<br/>";
+				}
+				sectionContent += test_number[0].toString(10);
+				testsSectionElem.innerHTML = sectionContent;
+			}
+			
+			function listIndividuals() {
+				// Clear section
+				var sectionContent = "";
+				individualsSectionElem.innerHTML = sectionContent;
+				testNumber = parseInt(testNumbernumberElem.value);
+				// Get iD and iL from the analysis number
+				var iL = (testNumber - 1) % L;
+				var iD = D - 1 - Math.floor((testNumber - 1) / L);
+				var latest = 1;
+				var consecutives = 0;
+				for (var iFila = 0; iFila < (N / L); iFila++) {
+					var individual_number = 1; // count from 1
+					for (iDcoef = 0; iDcoef < D; iDcoef++) {
+						var coef;
+						if (iDcoef != iD) {
+							if (iDcoef < iD) {
+								coef = Math.floor(iFila / Math.pow(L, iDcoef)) % L;
+							} else {
+								coef = Math.floor(iFila / Math.pow(L, iDcoef - 1)) % L;
+							}
+							individual_number += coef * Math.pow(L, iDcoef);
+						} else {
+							individual_number += iL * Math.pow(L, iDcoef);
+						}
+					}
+					if (iFila == 0) {
+						sectionContent += individual_number.toString(10);
+					} else {
+						if (iFila == (N / L - 1)) {
+							if (consecutives > 0) {
+								sectionContent += "..." + individual_number.toString(10);
+								consecutives = 0;
+							} else {
+								sectionContent += "<br/>" + individual_number.toString(10);
+							}
+						} else {
+							if (individual_number > (latest + 1)) {
+								if (consecutives > 0) {
+									sectionContent += "..." + latest.toString(10) + "<br/>" + individual_number.toString(10);
+									consecutives = 0;
+								} else {
+									sectionContent += "<br/>" + individual_number.toString(10);
+								}
+							} else {
+								consecutives++;
+							}
+						}
+					}
+					latest = individual_number;
+				}
+				// Fill section
+				individualsSectionElem.innerHTML = sectionContent;
+			}
+
+			function getIndividual() {
+				// Clear span
+				individualSpanElem.innerHTML = "";
+				// Get coefficient and exponent from each test
+				var coef = [];
+				var expon = [];
+				for (var i = 0; i < D; i++) {
+					test_number = document.getElementById("test" + i).value;
+					coef[i] = (test_number - 1) % L;
+					expon[i] = D - 1 - Math.floor((test_number - 1) / L);
+				}
+				// Calculate individual number
+				var individual_number = 1; // count from 1
+				for (var i = 0; i < D; i++) {
+					individual_number += coef[i] * Math.pow(L, expon[i]);
+				}
+				// Output
+				individualSpanElem.innerHTML = individual_number;
+			}
+			
+			function setLang(event, language) {
+				// Clear dynamic content
+				dyncontent = document.getElementsByClassName("langFromJS");
+				for (i = 0; i < dyncontent.length; i++) {
+					dyncontent[i].innerHTML = "";
+				}
+				// Get elements
+				englishcontent = document.getElementsByClassName("english");
+				spanishcontent = document.getElementsByClassName("spanish");
+				langbtns = document.getElementsByClassName("language-sel");
+				// Set all language buttons as inactive
+				for (i = 0; i < langbtns.length; i++) {
+					langbtns[i].className = langbtns[i].className.replace("active", "");
+				}
+				// Hide one language and show the other
+				if (language == "english") {
+					for (i = 0; i < spanishcontent.length; i++) {
+						spanishcontent[i].style.display = "none";
+					}
+					for (i = 0; i < englishcontent.length; i++) {
+						if (englishcontent[i].tagName == "SPAN") {
+							englishcontent[i].style.display = "inline";
+						} else {
+							englishcontent[i].style.display = "block";
+						}
+					}
+					// Change the title
+					document.title = "Pooled testing using hypercubes";
+				}
+				if (language == "spanish") {
+					for (i = 0; i < englishcontent.length; i++) {
+						englishcontent[i].style.display = "none";
+					}
+					for (i = 0; i < spanishcontent.length; i++) {
+						if (spanishcontent[i].tagName == "SPAN") {
+							spanishcontent[i].style.display = "inline";
+						} else {
+							spanishcontent[i].style.display = "block";
+						}
+					}
+					// Change the title
+					document.title = "Análisis con mezcla de muestras usando hipercubos";
+				}
+				// Set the button that was pressed as active
+				event.currentTarget.className += " active"; // note the space preceding 'active'
+				// Set the global variable
+				curLang = language;
+			}
+		</script>
+
+	</body>
+</html>
