@@ -90,149 +90,279 @@
 			<button class="language-sel" id="engBtn" onclick="setLang(event, 'english')">English</button>
 		</div>
 
-		<h1 class="spanish">Análisis con mezcla de muestras usando hipercubos</h1><h1 class="english">Pooled testing using hypercubes</h1>
-		
-		<h2 class="spanish">Tarea</h2><h2 class="english">Task</h2>
-		<p class="spanish">Analizar muestras de <i>N</i> individuos, cuando la prevalencia es baja, en el menor tiempo posible sin recurrir a instrumentos de diagnóstico adicionales.</p>
-		<p class="english">To test samples from <i>N</i> individuals, at low prevalence, in the shortest possible time without extra test equipment.</p>
 
-		<h2 class="spanish">Estrategia</h2><h2 class="english">Strategy</h2>
-		<blockquote class="english" cite="https://doi.org/10.1101/2020.05.02.20087924" style="background-color: khaki;">
-		We summarize the algorithm as follows:
-		<ol type="i">
-			<li>For a given initial estimate of the prevalence <i>p</i>, select the group size <i>N</i> to be the optimal power of 3, discussed below. Test the whole sample to see whether one or more infected individuals are present. A negative test indicates everyone in the group is clear of infection.</li>
-			<li>If the test is positive, run one round of testing according to the hypercube algorithm with <i>L</i> = 3. The distribution of results for the <i>LD</i> slices should, for large <i>N</i>, accurately indicate the number <i>m</i> of infected individuals, with many consistency checks including a new estimate of the prevalence. If <i>m=1</i>, the infected individual is immediately identified.</li>
-			<li>If <i>m = 2</i>, select a principal direction in which two slices are positive. Take one of these, itself a hypercube of dimension <i>D</i> − 1, and run the hypercube algorithm again. The coordinates of the corresponding infected individual are then uniquely identified, and those of the second infected individual are inferred by elimination.</li>
-			<li>If <i>m</i> > 2, select a principal direction in which all three slices are positive. Taking one of these, run the hypercube algorithm again. If that slice contains one infected individual, it is immediately identified. If the slice contains 2 or 3 infected individuals, their coordinates are discovered in 1 or 2 additional hypercube runs. The last infected individual is found by elimination. So, for <i>m</i> = 1, 2 or 3, only <i>m</i> runs are needed.</li>
-			<li>For <i>m</i> > 3, it is an exercise in combinatorics to work out the expected number of runs. This turns out to be a number slightly higher than <i>m</i>. The corrections to <i>m</i> for <i>m</i> = 4, 5, 6 are given in Appendix B. For reasons given there, these corrections turn out to be relatively unimportant.</li>
+		<h1 id="titleH"></h1>
+		
+		<p style="background-color: khaki;">L. Mutesa et at., <cite>A strategy for finding people infected with SARS-CoV-2: optimizing pooled testing at 
+		low prevalence</cite>, <a href="https://doi.org/10.1101/2020.05.02.20087924">https://doi.org/10.1101/2020.05.02.20087924</a>, 2020-08-03.</p>
+
+
+		<h2 class="spanish">Tarea</h2>
+		<h2 class="english">Task</h2>
+		
+		<p class="spanish">Analizar muestras de <i>n</i> individuos, cuando la prevalencia <i>p</i> es baja, en el menor tiempo posible sin recurrir 
+		a instrumentos de diagnóstico adicionales.</p>
+		<p class="english">To test samples from <i>n</i> individuals, at a low prevalence <i>p</i>, in the shortest possible time without extra 
+		test equipment.</p>
+
+
+		<h2 class="spanish">Estrategia</h2>
+		<h2 class="english">Strategy</h2>
+		
+		<ol>
+			<li><span class="spanish">
+					<u>Fase de análisis por grupos</u>
+					
+					<p>Dividir las <i>n</i> muestras en <i>g</i> grupos de <i>N</i> muestras cada uno, con <i>N</i> igual a la potencia de 3 
+					(valor de <i>L</i> que minimiza la cantidad de análisis por individuo) más cercana a <sup>0.35</sup>&frasl;<sub><i>p</i></sub>. 
+					Hacer un análisis por cada grupo, es decir <i>g</i> análisis con <i>N</i> submuestras mezcladas en cada uno.</p>
+					<p>Se puede además, ya que se conoce la fracción <i>f</i> de grupos negativos, mejorar la estimación de la prevalencia: 
+					<i>p</i> = 1 − <i>f</i><sup>1/<i>N</i></sup>. Si el valor de <i>p</i> así estimado es muy distinto de la estimación inicial, se puede elegir 
+					otro valor de <i>N</i> para la siguiente fase.</p>
+				</span>
+				<span class="english">
+					<u>Group testing phase</u>
+
+					<p>Divide the <i>n</i> samples into <i>g</i> groups of size <i>N</i>, with <i>N</i> chosen as the power of 3 (value for which the 
+					number of tests per person is minimum) closest to <sup>0.35</sup>&frasl;<sub><i>p</i></sub>. Test each group: perform <i>g</i> tests, each 
+					with a pool of <i>N</i> subsamples.</p>
+					<p>A new estimate of the prevalence can be made once the fraction <i>f</i> of groups that tested negative is known: 
+					<i>p</i> = 1 − <i>f</i><sup>1/<i>N</i></sup>. If the new estimate differs significantly from the original one, another value for <i>N</i>
+					may then be chosen for the next phase.</p>
+				</span>
+			</li>
+			<li><span class="spanish">
+					<u>Fase de análisis por tajadas - Primera ronda</u>
+					
+					<p>Pasar los grupos que en la primera fase resultaron positivos, a una primera ronda de análisis por tajadas.</p>
+					<p>Para cada grupo de <i>N</i> individuos, tomar <i>D</i> submuestras de cada muestra correspondiente a un individuo, y 
+					mezclar	<sup><i>N</i></sup>&frasl;<sub><i>L</i></sub> submuestras en cada uno de <i>T</i> = <i>D</i> * <i>L</i> análisis. 
+					Asignar los individuos a los análisis de modo que a cada individuo le corresponda un conjunto de análisis distinto.</p>
+					<p>Esto último se hace asignando a cada individuo una <i>D</i>-tupla de dígitos, cada uno de un valor tomado de entre 
+					<i>L</i> valores. La <i>D</i>-tupla corresponde a la coordenada de un punto en un hipercubo de <i>D</i> dimensiones, con <i>L</i> puntos 
+					en cada 
+					dirección. En cada análisis va una tajada del hipercubo, formada por los individuos que comparten una misma coordenada en 
+					determinada dirección.</p>
+					<p>La <i>D</i>-tupla que identifica a un individuo se puede intrepretar también como un número en un sistema 
+					de numeración en base <i>L</i>. Cada uno de los <i>L</i> valores de cada uno de los <i>D</i> dígitos, corresponde a un análisis; 
+					de ahí que haya <i>D</i> * <i>L</i> análisis para los <i>N</i> individuos.</p>
+					<p>Ahora, un ejemplo sencillo usando <i>L</i> = 10 (valor no óptimo). 
+					Supongamos que hay que analizar <i>N</i> = 100 individuos ya que se estima <i>p</i> = 0.0035. Numeramos los individuos del 0 al 99. 
+					<i>D</i> = 2 ya que 10<sup>2</sup> = 100. Luego hacemos <i>D</i> * <i>L</i> = 2 * 10 = 20 análisis,cada uno con 
+					<sup><i>N</i></sup>&frasl;<sub><i>L</i></sub> = <sup><i>100</i></sup>&frasl;<sub><i>10</i></sub> = 10 submuestras. 
+					Hacemos corresponder cada análisis a un dígito: un análisis para el 0 de las unidades, otro para el 0 de las decenas, etc. 
+					En el análisis correspondiente al dígito 0 de las unidades, mezclamos las 10 submuestras de los 
+					individuos identificados con números terminados en 0, es decir 0, 10, 20,…, 90. En el análisis correspondiente al dígito 3 de las decenas, 
+					mezclamos las 10 submuestras de los individuos identificados con números que tienen 3 en esa posición: 30, 31,…, 39. 
+					Y así para los restantes dieciocho 
+					análisis. Si hay un individuo infectado, resultarán positivos los análisis que lo identifican; por ejemplo, si solamente 
+					resultan positivos los análisis correspondientes al 5 de las unidades y al 1 de las decenas, sabemos que el individuo identificado 
+					con el número 15 (y sólo él) está infectado. Los 20 análisis se pueden hacer a la vez. Ahorramos 80 anñalisis. Usando <i>L</i> = 3 
+					—valor óptimo—, el ahorro es todavía mayor: bastan 15 análisis para identificar el individuo infectado.</p>
+				</span>
+				<span class="english">
+					<u>Slicing tests phase - First round</u>
+
+					<p>Perform a first round of slicing tests on the groups that tested positive in the first phase.</p>
+					<p>For each group of <i>N</i> individuals, take <i>D</i> subsamples from each individual sample, and pool (or combine) 
+					<sup><i>N</i></sup>&frasl;<sub><i>L</i></sub> subsamples for each of <i>T</i> = <i>D</i> * <i>L</i> tests. 
+					Assign individuals to tests in a way that allows associating an individual with a certain set of tests.</p>
+					<p>To associate an individual with a certain set of tests, a <i>D</i>-tuple of digits is assigned to each individual, each digit taking 
+					a value from a number <i>L</i> of values. Each <i>D</i>-tuple corresponds to the coordinate of a point in a hypercube of <i>D</i> 
+					dimensions, 
+					with <i>L</i> points on each side. Each test corresponds to a slice of the hypercube, composed of those individuals that have the same
+					coordinate in a given direction.</p>
+					<p>The <i>D</i>-tuple that identifies an individual may be also treated as a <i>D</i>-digit number in a base-<i>L</i> numeral system. 
+					Each of the <i>L</i> values of each of the <i>D</i> digits corresponds to a test; from this it follows that <i>D</i> * <i>L</i> is the 
+					number of tests to perform for the <i>N</i> individuals.</p>
+					<p>Now, a simple example, using <i>L</i> = 10 (not the optimum value). Assume there 
+					are <i>N</i> = 100 individuals to test, because it is estimated that <i>p</i> = 0.0035. We number the individuals from 0 to 99. 
+					<i>D</i> = 2, because 10<sup>2</sup> = 100. We then have to perform <i>D</i> * <i>L</i> = 2 * 10 = 20 tests, each with 
+					<sup><i>N</i></sup>&frasl;<sub><i>L</i></sub> = <sup><i>100</i></sup>&frasl;<sub><i>10</i></sub> = 10 subsamples. We assign each test to a 
+					digit: one test corresponds to 0 in ones place, another test to 0 in tens place, etc. For the test that corresponds to 0 in ones place, 
+					we pool the 10 subsamples from those individuals identified with numbers ending in 0, i.e. 0, 10, 20,…, 90. For the test that 
+					corresponds to 3 in tens place, we pool the 10 subsamples from those individuals identified with numbers having a 3 in tens place: 
+					30, 31,…, 39. And similarly for the other eighteen tests. If an individual is infected, the positive tests will be those corresponding 
+					to the identification number; for example, if only the tests that correspond to 5 in ones place and 1 in tens place are positive, 
+					we know that the individual with number 15 (and only him or her) is infected. All 20 tests can be performed simultaneously. We 
+					save the cost of 80 tests. By using <i>L</i> = 3 —the optimum value— the savings are greater still: only 15 tests are needed to 
+					identify the infected individual.</p>
+				</span>
+			</li>
+			<li><span class="spanish">
+					<u>Fase de análisis por tajadas - Pasos a seguir luego de la primera ronda</u>
+					
+					<p>Si sólo hay una tajada positiva en cada dirección, hay sólo un individuo infectado, que se identifica inmediatamente.</p>
+					<p>Si sólo en una dirección hay más de una tajada positiva, se identifica inmediatamente a los individuos infectados.</p>
+					<p>Si hay más de una dirección con más de una tajada positiva, se pasan a una segunda ronda de análisis 
+					los individuos identificados por tajadas que resultaron positivas. En el ejemplo de arriba, si los análisis correspondientes a los 
+					dígitos 2 y 7 de las unidades y 4, 6 y 9 de las decenas resultaron positivos —caso muy poco probable para la prevalencia estimada—, 
+					pueden estar infectados entre tres y seis de los individuos identificados con los números 42, 47, 62, 67, 92 y 97.</p>
+				</span>
+				<span class="english">
+					<u>Slicing tests phase - Steps to take after the first round</u>
+					
+					<p>If there is only one positive slice in each direction, there is only one infected individual, that is immediately identified.</p>
+					<p>If there is only one direction in which several slices are positive, all infected individuals are immediately identified.</p>
+					<p>If there are several directions in which several slices are positive, those individuals identified with slices that tested positive 
+					are included in a second round of slicing tests. In the example above, if the positive tests correspond to 2 and 7 in ones place and 
+					4, 6 and 9 in tens place —a very low probability case given the estimated prevalence— between three and six individuals are infected 
+					among those identified with numbers 42, 47, 62, 67, 92 and 97.</p>
+				</span>
+			</li>
 		</ol>
-		<footer>L. Mutesa et at., <cite>A strategy for finding people infected with SARS-CoV-2: optimizing pooled testing at low prevalence</cite>, pp. 4-5, May 19, 2020, <a href="https://doi.org/10.1101/2020.05.02.20087924">https://doi.org/10.1101/2020.05.02.20087924</a>.</footer>
-		</blockquote>
 
-		<blockquote class="spanish" cite="https://doi.org/10.1101/2020.05.02.20087924" style="background-color: khaki;">
-		Resumimos el algoritmo de la manera siguiente:
-		<ol type="i">
-			<li>Dada una estimación inicial de la prevalencia <i>p</i>, seleccionar el tamaño del grupo <i>N</i> para que sea la potencia de 3 óptima, según se discute más abajo. Analizar el grupo entero para ver si hay algún individuo infectado. Un resultado negativo indica que ningún individuo del grupo está infectado.</li>
-			<li>Si el resultado es positivo, hacer una ronda de ensayos o análisis de acuerdo al algoritmo del hipercubo con <i>L</i> = 3. La distribución de resultados de las <i>LD</i> tajadas debería, para <i>N</i> grande, indicar con exactitud la cantidad <i>m</i> de individuos infectados, con muchas pruebas de consistencia incluyendo una nueva estimación de la prevalencia. Si <i>m</i> = 1, el individuo infectado es identificado inmediatamente.</li>
-			<li>Si <i>m</i> = 2, elegir una dirección principal en la cual dos tajadas son positivas. Tomar una de estas, que es a su vez un hipercubo de <i>D</i> - 1 dimensiones, y ejecutar el algoritmo del hipercubo nuevamente. Las coordenadas del individuo infectado son entonces identificadas unívocamente, y las del otro individuo infectado se infieren por eliminación.</li>
-			<li>Si <i>m</i> > 2, elegir una dirección principal en la cual las tres tajadas son positivas. Tomando una de estas, ejecutar el algoritmo del hipercubo nuevamente. Si la tajada contiene solo un individuo infectado, es identificado inmediatamente. Si contiene 2 o 3 individuos infectados, sus coordenadas se descubren en 1 o 2 ejecuciones adicionales del algoritmo del hipercubo. El último individuo infectado se halla por eliminación. Entonces, para <i>m</i> = 1, 2 o 3, solo hace falta ejecutar el algoritmo <i>m</i> veces.</li>
-			<li>Para <i>m</i> > 3, la cantidad de veces que hay que ejecutar el algoritmo es un ejercicio de combinatoria. Esta cantidad resulta un número levemente mayor que <i>m</i>. Las correcciones para <i>m</i> = 4, 5, 6 se dan en el apéndice B. Por las razones dadas allí, estas correcciones resultan relativamente insignificantes.</li>
-		</ol>
-		<footer>L. Mutesa et at., <cite>A strategy for finding people infected with SARS-CoV-2: optimizing pooled testing at low prevalence</cite> (Una estrategia para hallar gente infectada con SARS-CoV-2: optimizando los análisis con muestras mezcladas cuando la prevalencia es baja), pp. 4-5, May 19, 2020, <a href="https://doi.org/10.1101/2020.05.02.20087924">https://doi.org/10.1101/2020.05.02.20087924</a>.</footer>
-		</blockquote>
+		<h2 class="spanish">Este archivo</h2>
+		<h2 class="english">This file</h2>
 		
-		<h3 class="spanish">Observaciones</h3><h3 class="english">Notes</h3>
-		<p class="spanish">La estrategia es útil cuando <i>p</i> es cercana a 0.01 (1 %). Para valores mayores de <i>p</i>, la cantidad de individuos que minimiza la cantidad de análisis, <i>N<sub>opt</sub></i>, es muy baja. Por ejemplo si <i>p</i> = 0.04 (4 %), es <i>N<sub>opt</sub></i> = 8.75, y un algoritmo del hipercubo implementado con <i>N</i> = 9, <i>D</i> = 2 y <i>L</i> = 3, requiere realizar 6 análisis (⅔ de <i>N</i>). En cambio, cuando <i>p</i> = 0.01 (1 %), es <i>N<sub>opt</sub></i> = 35, y el algoritmo del hipercubo con <i>N</i> = 27, <i>D</i> = 3 y <i>L</i> = 3, requiere solamente 9 análisis (⅓ de <i>N</i>). La ventaja aumenta a medida que <i>p</i> disminuye. Por ejemplo, si se estima que 1 ‰ de la población está infectada (<i>p</i> = 0.001), se la puede analizar de a grupos de 243 individuos, con solo 15 análisis por grupo, con muy baja probabilidad de que haga falta algún análisis extra para identificar los infectados.</p>
-		<p class="spanish">La cantidad de análisis se minimiza, para cualquier valor de <i>N</i>, cuando <i>L</i> = 3.</p>
-		<p class="english">The strategy is useful when <i>p</i> is near 0.01 (1 %). For greater <i>p</i> values, the number of individuals that minimizes the number of tests per individual, <i>N<sub>opt</sub></i>, is very low. For example, if <i>p</i> = 0.04 (4 %), <i>N<sub>opt</sub></i> = 8.75, and a hypercube algorithm using <i>N</i> = 9, <i>D</i> = 2 and <i>L</i> = 3, requires 6 tests (⅔ of <i>N</i>). In contrast, when <i>p</i> = 0.01 (1 %), <i>N<sub>opt</sub></i> = 35, and a hypercube algorithm with <i>N</i> = 27, <i>D</i> = 3 and <i>L</i> = 3, requires only 9 tests (⅓ of <i>N</i>). The advantage gets even greater as <i>p</i> decreases. For example, if it is estimated that 1 ‰ of the population is infected (<i>p</i> = 0.001), it can be tested in groups of 243 individuals, with only 15 tests per group, with a very low probability that extra tests will be required to identify the infected individuals.</p>
-		<p class="english">The number of tests reaches its minimum, for every <i>N</i> value, when <i>L</i> = 3.</p>
-		
-		<h3 class="spanish">Algoritmo del hipercubo</h3><h3 class="english">Hypercube algorithm</h3>
+		<span class="spanish">
+			<p>Esta página se hizo para poder preparar análisis por tajadas, e interpretar sus resultados, cuando se usan números naturales en el sistema 
+			decimal tanto para los análisis como para los individuos.</p>
+			<p>Más abajo el usuario puede ingresar el valor de <i>p</i> y obtener los valores óptimos de <i>N</i>, <i>D</i> y <i>L</i>, o bien ingresar el 
+			valor de una (o dos) de estas variables y obtener el resto.</p>
+			<p>En las pestañas de <i>Preparación</i> de análisis, se informa, para los valores ingresados, cuáles submuestras debe contener un 
+			análisis determinado, y en cuáles análisis deben ir submuestras de determinado individuo.</p>
+			<p>En la pestaña de <i>Resultados</i>, se informa, dados los resultados de los análisis, cuáles individuos están infectados 
+			o cuáles individuos pasan a una ronda adicional de análisis.</p>
+		</span>
+		<span class="english">
+			<p>This page was written to help prepare slicing tests and interpret their results, numbering both tests and individuals with positive 
+			integers in the decimal system.</p>
+			<p>The user can enter, below, either the value of <i>p</i>, letting the system determine the optimum values for <i>N</i>, <i>D</i> and 
+			<i>L</i>, or the value of one (or two) of these variables, obtaining the other(s).</p>
+			<p>The <i>Preparation</i> tabs show, for the values entered, which subsamples are to be combined for a given test, and which tests 
+			must contain a subsample from a given individual.</p>
+			<p>The <i>Results</i> tab shows, given the results from the tests, which individuals are infected (if any) or which individuals 
+			should be included in an additional round of testing.</p>
+		</span>
 
-		<h4 class="spanish">Cantidades y símbolos</h4><h4 class="english">Quantities and symbols</h4>
+
+		<h2 class="spanish">Ecuaciones</h2>
+		<h2 class="english">Equations</h2>
+		
 		<ul>
-			<li><span class="spanish">Prevalencia</span><span class="english">Prevalence</span>: <i>p</i></li>
-			<li><span class="spanish">Cantidad de individuos</span><span class="english">Number of individuals</span>: <i>N</i></li>
-			<li><span class="spanish">Cantidad de individuos que minimiza la cantidad de análisis por individuo</span><span class="english">Number of individuals that minimizes the number of tests per individual</span>: <i>N<sub>opt</sub></i></li>
-			<li><span class="spanish">Cantidad total de análisis</span><span class="english">Total number of tests</span>: <i>L * D</i></li>
-			<li><span class="spanish">Cantidad de submuestras de una muestra individual</span><span class="english">Number of subsamples from an individual sample</span>: <i>D</i></li>
-			<li><span class="spanish">Cantidad de submuestras por análisis</span><span class="english">Number of subsamples per test</span>: <i>n<sub>S</sub></i></li>
+			<li><span class="spanish">Cantidad de individuos:</span><span class="english">Number of individuals:</span>
+				<math xmlns="http://www.w3.org/1998/Math/MathML">
+					<mrow>
+						<mi>N</mi>
+						<mo stretchy="false">=</mo>
+						<msup>
+							<mi>L</mi>
+							<mi>D</mi>
+						</msup>
+					</mrow>
+				</math>
+			</li>
+			<li><span class="spanish">Cantidad de análisis:</span><span class="english">Number of tests:</span>
+				<math xmlns="http://www.w3.org/1998/Math/MathML">
+					<mrow>
+						<mi>T</mi>
+						<mo stretchy="false">=</mo>
+						<mi>D</mi>
+						<mo>×</mo>
+						<mi>L</mi>
+					</mrow>
+				</math>
+			</li>
+			<li><span class="spanish">Cantidad de submuestras por análisis:</span><span class="english">Number of subsamples per test:</span>
+				<math xmlns="http://www.w3.org/1998/Math/MathML">
+					<mrow>
+						<msub>
+							<mi>n</mi>
+							<mi>S</mi>
+						</msub>
+						<mo stretchy="false">=</mo>
+						<mfrac>
+							<mi>N</mi>
+							<mi>L</mi>
+						</mfrac>
+					</mrow>
+				</math>
+			</li>
+			<li><span class="spanish">Cantidad óptima de individuos:</span><span class="english">Optimum number of individuals:</span>
+				<math xmlns="http://www.w3.org/1998/Math/MathML">
+					<mrow>
+						<msub>
+							<mi>N</mi>
+							<mi mathvariant="italic">opt</mi>
+						</msub>
+						<mo stretchy="false">≈</mo>
+						<mfrac>
+							<mn>0.35</mn>
+							<mi>p</mi>
+						</mfrac>
+					</mrow>
+				</math>
+			</li>
 		</ul>
 
-		<h4 class="spanish">Ecuaciones</h4><h4 class="english">Equations</h4>
-			<math xmlns="http://www.w3.org/1998/Math/MathML">
-				<mrow>
-					<mtable>
-						<mtr>
-							<mtd>
-								<mrow>
-									<mi>N</mi>
-									<mo stretchy="false">=</mo>
-									<msup>
-										<mi>L</mi>
-										<mi>D</mi>
-									</msup>
-								</mrow>
-							</mtd>
-						</mtr>
-						<mtr>
-							<mtd>
-								<mrow>
-									<msub>
-										<mi>n</mi>
-										<mi>S</mi>
-									</msub>
-									<mo stretchy="false">=</mo>
-									<mfrac>
-										<mi>N</mi>
-										<mi>L</mi>
-									</mfrac>
-								</mrow>
-							</mtd>
-						</mtr>
-						<mtr>
-							<mtd>
-								<mrow>
-									<msub>
-										<mi>N</mi>
-										<mi mathvariant="italic">opt</mi>
-									</msub>
-									<mo stretchy="false">≈</mo>
-									<mfrac>
-										<mn>0.35</mn>
-										<mi>p</mi>
-									</mfrac>
-								</mrow>
-							</mtd>
-						</mtr>
-					</mtable>
-				</mrow>
-			</math>
-			
-		<h4 class="spanish">Implementación</h4><h4 class="english">Implementation</h4>
-		<p class="spanish">Cada individuo es representado por un número de <i>D</i> cifras en base <i>L</i>. Cada cifra, junto con su posición, determina un análisis que contiene una submuestra del individuo. Tanto los individuos como los análisis se numeran a partir de 1. En cada dirección principal del hipercubo hay <i>L</i> análisis numerados en forma consecutiva hasta un múltiplo de <i>L</i> (por ejemplo si <i>L</i> = 3, los análisis 4, 5 y 6 están en una dirección principal del hipercubo).</p>
-		<p class="english">Each individual is represented by a number of <i>D</i> digits in base <i>L</i>. Each digit, together with its position, determines a test that includes a subsample of the individual. Individuals and tests are numbered from 1. In each principal direction of the hypercube, there are <i>L</i> tests numbered consecutively up to a multiple of <i>L</i> (e. g., for <i>L</i> = 3, tests 4, 5 and 6 lie on a principal direction.)</p>
+
+		<h2 class="spanish">Valores</h2>
+		<h2 class="english">Values</h2>
 		
-		<p><i>p</i> [0-1]: <input type="number" id="pnumber" min="0" step="any" max="1" onchange="computeNopt()"> <i>N<sub>opt</sub></i>: <span class="langFromJS" id="Nopt_span"></span></p>
-		<p><i>N</i>: <input type="number" id="Nnumber" min="1" step="1" onchange="computeLetc()"></p>
-		<p><i>D</i>: <input type="number" id="Dnumber" min="1" step="1" onchange="computeLetc()"></p>
-		<p><i>L</i>: <span class="langFromJS" id="Lspan"></span></p>
+		<p><i>p</i> [0-1]: <input type="number" id="pnumber" min="0" step="any" max="1" onchange="computeNopt()"> 
+		<span class="langFromJS" id="perr_span"></span></p>
+		<p><i>N</i>: <input type="number" id="Nnumber" min="1" step="1" onchange="computeNDL()"></p>
+		<p><i>D</i>: <input type="number" id="Dnumber" min="1" step="1" onchange="computeNDL()"></p>
+		<p><i>L</i>: <input type="number" id="Lnumber" value="3" min="1" step="1" onchange="computeNDL()"></p>
+		<p><i>T</i>: <span id="Tspan"></span></p>
+		<p><i>n</i><sub><i>S</i></sub>: <span id="nSspan"></span></p>
+
 
 		<!-- Tab links -->
 		<div class="tab">
-			<button id="tabBtn1" class="tablinks" onclick="openTab(event, '1')"><span class="spanish">Pestaña</span><span class="english">Tab</span> 1</button>
-			<button id="tabBtn2" class="tablinks" onclick="openTab(event, '2')"><span class="spanish">Pestaña</span><span class="english">Tab</span> 2</button>
-			<button id="tabBtn3" class="tablinks" onclick="openTab(event, '3')"><span class="spanish">Pestaña</span><span class="english">Tab</span> 3</button>
+			<button id="tabBtn1" class="tablinks" onclick="openTab(event, '1')"><span class="spanish">Preparación</span><span class="english">Preparation</span> 1</button>
+			<button id="tabBtn2" class="tablinks" onclick="openTab(event, '2')"><span class="spanish">Preparación</span><span class="english">Preparation</span> 2</button>
+			<button id="tabBtn3" class="tablinks" onclick="openTab(event, '3')"><span class="spanish">Resultados</span><span class="english">Results</span></button>
 		</div>
 
 		<!-- Tab content -->
 		<div class="tabcontent" id="1">
-			<h5 class="spanish">Análisis que incluyen submuestras de un individuo dado</h5><h5 class="english">Tests that include subsamples of a given individual</h5>
-			<p><span class="spanish">Individuo</span><span class="english">Individual</span>: <input type="number" id="Inumber" min="1" step="1" onchange="listTests()"></p>
+			<h3 class="spanish">Análisis que incluyen submuestras de un individuo dado</h3>
+			<h3 class="english">Tests that include subsamples from a given individual</h3>
+			
+			<p><span class="spanish">Individuo</span><span class="english">Individual</span>: 
+			<input type="number" id="Inumber" min="1" step="1" onchange="listTests()"></p>
 			<p><span class="spanish">Análisis</span><span class="english">Tests</span>:</p>
 			<section id="testsSection"></section>
 		</div>
 		<div class="tabcontent" id="2">
-			<h5 class="spanish">Individuos cuyas submuestras componen un análisis dado</h5><h5 class="english">Individuals whose subsamples go into a given test</h5>
-			<p><span class="spanish">Análisis</span><span class="english">Test</span>: <input type="number" id="testNumbernumber" min="1" step="1" onchange="listIndividuals()"></p>
+			<h3 class="spanish">Individuos cuyas submuestras componen un análisis dado</h3>
+			<h3 class="english">Individuals whose subsamples go into a given test</h3>
+			
+			<p><span class="spanish">Análisis</span><span class="english">Test</span>: 
+			<input type="number" id="testNumbernumber" min="1" step="1" onchange="listIndividuals()"></p>
 			<section id="individualsSection"></section>
 		</div>
 		<div class="tabcontent" id="3">
-			<h5 class="spanish">Individuo correspondiente a un conjunto dado de análisis</h5><h5 class="english">Individual corresponding to a given set of tests</h5>
+			<h3 class="spanish">Interpretación de resultados</h3>
+			<h3 class="english">Analysis of test results</h3>
+			
 			<section id="testssetSection"></section>
-			<button onclick="getIndividual()"><span class="spanish">Hallar</span><span class="english">Get</span></button> <span class="spanish">Individuo</span><span class="english">Individual</span>: <span id="individualSpan"></span>
+			<button onclick="getInfected()"><span class="spanish">Listar infectados</span><span class="english">List infected</span></button> 
+			<span id="infectedSpan" class="langFromJS"></span>
 		</div>
 		
 		<!-- Footer -->
 		<hr></hr>
 		<small>
 			<blockquote class="english" cite="https://doi.org/10.1086/224129">
-				When Person and Other interact in a situation in which there are several possible outcomes, not all equally favorable to both, Person may prefer an outcome in which the relative advantage of his welfare over Other's is the greatest (competition), or an outcome in which the sum of his welfare and that of Other is the greatest (cooperation), or simply that outcome in which his own welfare is the greatest, irrespective of Other's (individualism).
-				<footer>Sawyer, J.: <cite>The Altruism Scale: A Measure of Co-operative, Individualistic, and Competitive Interpersonal Orientation</cite>, <i>American Journal of Sociology</i>, Vol. 71, No. 4 (Jan., 1966), pp. 407-416. <a href="https://www.journals.uchicago.edu/doi/abs/10.1086/224129">https://www.journals.uchicago.edu/doi/abs/10.1086/224129</a></footer>
+				When Person and Other interact in a situation in which there are several possible outcomes, not all equally favorable to both, Person may 
+				prefer an outcome in which the relative advantage of his welfare over Other's is the greatest (competition), or an outcome in which the sum 
+				of his welfare and that of Other is the greatest (cooperation), or simply that outcome in which his own welfare is the greatest, irrespective 
+				of Other's (individualism).
+				<footer>Sawyer, J.: <cite>The Altruism Scale: A Measure of Co-operative, Individualistic, and Competitive Interpersonal Orientation</cite>, 
+				<i>American Journal of Sociology</i>, Vol. 71, No. 4 (Jan., 1966), pp. 407-416. 
+				<a href="https://www.journals.uchicago.edu/doi/abs/10.1086/224129">https://www.journals.uchicago.edu/doi/abs/10.1086/224129</a></footer>
 			</blockquote>
 			<blockquote class="spanish" cite="https://doi.org/10.1086/224129">
-				Cuando Persona y Otro interactúan en una situación de la que se pueden seguir varios resultados, no todos ellos igualmente favorables a ambos, Persona puede preferir un resultado en el cual la ventaja relativa de su bienestar con respecto al de Otro es la mayor (competencia), o un resultado en el cual la suma de su bienestar y el de Otro es la mayor (cooperación), o simplemente aquel resultado en el cual su propio bienestar es el mayor, independientemente del de Otro (individualismo).
-				<footer>Sawyer, J.: <cite>The Altruism Scale: A Measure of Co-operative, Individualistic, and Competitive Interpersonal Orientation</cite> (La escala de altruismo: una medida de la orientación interpersonal cooperativa, individualista, y competitiva), <i>American Journal of Sociology</i>, vol. 71, nro. 4 (enero 1966), pp. 407-416.</footer>
+				Cuando Persona y Otro interactúan en una situación de la que se pueden seguir varios resultados, no todos ellos igualmente favorables a 
+				ambos, Persona puede preferir un resultado en el cual la ventaja relativa de su bienestar con respecto al de Otro es la mayor (competencia), 
+				o un resultado en el cual la suma de su bienestar y el de Otro es la mayor (cooperación), o simplemente aquel resultado en el cual su propio 
+				bienestar es el mayor, independientemente del de Otro (individualismo).
+				<footer>Sawyer, J.: <cite>The Altruism Scale: A Measure of Co-operative, Individualistic, and Competitive Interpersonal Orientation</cite>
+				 (La escala de altruismo: una medida de la orientación interpersonal cooperativa, individualista, y competitiva), 
+				 <i>American Journal of Sociology</i>, vol. 71, nro. 4 (enero 1966), pp. 407-416.</footer>
 			</blockquote>
 		</small>
 		</p>
@@ -270,40 +400,55 @@
 		<!-- Javascript -->
 		<script>
 			// Declare variables
-			var NnumberElem,
+			var	pnumberElem,
+				NnumberElem,
 				DnumberElem,
-				pnumberElem,
+				LnumberElem,
+				perr_spanElem,
+				TspanElem,
+				nSspanElem,
 				testNumbernumberElem,
 				InumberElem,
-				Nopt_spanElem,
-				LspanElem,
-				individualSpanElem,
+				infectedSpanElem,
 				individualsSectionElem,
 				testsSectionElem,
 				testssetSectionElem,
 				N,
 				D,
 				L,
-				testNumber,
-				curLang;
+				T,
+				nS,
+				curLang,
+				titleHElem,
+				title_es = "Análisis con mezcla de submuestras identificadas por tuplas",
+				title_en = "Pooled testing of subsamples identified by tuples";
 			
 			// Initialize variables, set language
 			window.onload = function() {
 				// Get elements
+				titleHElem = document.getElementById("titleH");
 				pnumberElem = document.getElementById("pnumber");
 				NnumberElem = document.getElementById("Nnumber");
 				DnumberElem = document.getElementById("Dnumber");
-				LspanElem = document.getElementById("Lspan");
-				Nopt_spanElem = document.getElementById("Nopt_span");
+				LnumberElem = document.getElementById("Lnumber");
+				perr_spanElem = document.getElementById("perr_span");
+				TspanElem = document.getElementById("Tspan");
+				nSspanElem = document.getElementById("nSspan");
 				InumberElem = document.getElementById("Inumber");
 				testsSectionElem = document.getElementById("testsSection");
 				testssetSectionElem = document.getElementById("testssetSection");
 				testNumbernumberElem = document.getElementById("testNumbernumber");
 				individualsSectionElem = document.getElementById("individualsSection");
-				individualSpanElem = document.getElementById("individualSpan");
+				infectedSpanElem = document.getElementById("infectedSpan");
 			
+				// Initial inputs that Firefox doesn't clear on reload
+				pnumberElem.value = "";
+				NnumberElem.value = "";
+				DnumberElem.value = "";
+				LnumberElem.value = 3;
+
 				// Set language
-				document.getElementById("engBtn").click();
+				document.getElementById("spaBtn").click();
 				// Open a tab
 				document.getElementById("tabBtn2").click();
 			}
@@ -328,113 +473,146 @@
 			}
 
 			function computeNopt() {
+				var p;
+				
 				p = parseFloat(pnumberElem.value);
 				if (isFinite(p)) {
 					if ((p >= 1) || (p <= 0)) {
 						if (curLang == "english") {
-							Nopt_spanElem.innerHTML = "<i>p</i> range: (0...1)";
+							perr_spanElem.innerHTML = "<i>p</i> range: (0...1)";
 						}
 						if (curLang == "spanish") {
-							Nopt_spanElem.innerHTML = "Rango de <i>p</i>: (0...1)";
+							perr_spanElem.innerHTML = "Rango de <i>p</i>: (0...1)";
 						}
 					} else {
-						exact_int_Nopt = Math.round(0.35 / p);
-						Dopt = Math.round(Math.log(exact_int_Nopt) / Math.log(3));
-						Nopt_Lopt = Math.pow(3, Dopt);
-						Nopt_spanElem.innerHTML = exact_int_Nopt + ". ";
-						if (curLang == "english") {
-							Nopt_spanElem.innerHTML += "Parameters for ";
+						L = LnumberElem.value * 1;
+						if (Number.isInteger(L) && L >= 1) {
+							// Value that may not satifsy the equation
+							N = Math.round(0.35 / p);
+							// Final values
+							D = Math.round(Math.log(N) / Math.log(L));
+							N = Math.pow(L, D);
+							// Show them
+							NnumberElem.value = N;
+							DnumberElem.value = D;
+							LnumberElem.value = L;
+							// Clear error message
+							perr_spanElem.innerHTML = "";
+							// Call the event listener
+							computeNDL();
 						}
-						if (curLang == "spanish") {
-							Nopt_spanElem.innerHTML += "Parámetros para ";
-						}
-						Nopt_spanElem.innerHTML += 	"<i>L</i> = 3: <i>D</i> = " + Dopt + ", <i>N</i> = " + Nopt_Lopt;
 					}
 				}
 			}
 			
-			function computeLetc() {
-				N = parseInt(NnumberElem.value);
-				D = parseInt(DnumberElem.value);
-				if (N != 0 && D != 0) {
-					L = Math.pow(N, 1 / D);
-					if (Number.isInteger(L)) {
-						LspanElem.innerHTML = L;
-						InumberElem.setAttribute("max", N);
-						testNumbernumberElem.setAttribute("max", D * L);
-					} else {
-						if (isFinite(L)) {
-							if (curLang == "english") {
-								LspanElem.innerHTML = "N is not the D-th power of an integer. ";
-							}
-							if (curLang == "spanish") {
-								LspanElem.innerHTML = "N no es D-ésima potencia de un entero. ";
-							}
-							LspanElem.innerHTML += Math.round(L) + "<sup>" + D + "</sup> = " + Math.pow(Math.round(L), D)
+			function computeNDL() {
+				var sectionContent;
+				var i;
+				
+				// Read values
+				N = NnumberElem.value * 1;
+				D = DnumberElem.value * 1;
+				L = LnumberElem.value * 1;
+				if(Number.isInteger(N) && N > 0 && Number.isInteger(D) && D > 0 && Number.isInteger(L) && L > 0 && N == Math.pow(L, D)) {
+					// Fill T and nS
+					T = D * L;
+					nS = N / L;
+					TspanElem.innerHTML = T;
+					nSspanElem.innerHTML = nS;
+					// Set maximum values for inputs
+					InumberElem.setAttribute("max", N);
+					testNumbernumberElem.setAttribute("max", T);
+					// Fill the tests set section with t inputs of type checkbox
+					sectionContent = "";
+					testssetSectionElem.innerHTML = sectionContent;
+					for (i = 1; i <= T; i++) {
+						if (curLang == "english") {
+							sectionContent += "<input type='checkbox' id='test" + i + "'> <label for='test" + i + "'>Test " + i + "</label>";
+						}
+						if (curLang == "spanish") {
+							sectionContent += "<input type='checkbox' id='test" + i + "'> <label for='test" + i + "'>Análisis " + i + "</label>";
+						}
+						if (i != T) {
+							sectionContent += "<br>";
 						}
 					}
+					testssetSectionElem.innerHTML = sectionContent;
+				} else {
+					// Clear T and nS
+					TspanElem.innerHTML = "";
+					nSspanElem.innerHTML = "";
+					// Remove maximum values for inputs
+					InumberElem.removeAttribute("max");
+					testNumbernumberElem.removeAttribute("max");
+					// Clear the tests set section
+					testssetSectionElem.innerHTML = "";
 				}
-				// Fill the tests set section with D inputs of type number (min=1, step=1, max=D*L) -one for each principal direction
-				var sectionContent = "";
-				testssetSectionElem.innerHTML = sectionContent;
-				for (var i = 0; i < D; i++) {
-					sectionContent += "<input type='number' id='test" + i + "' min='" + (i * L + 1) + "' step='1' max='" + ((i + 1) * L) + "'>";
-					if (i != (D - 1)) {
-						sectionContent += "<br/>";
-					}
-				}
-				testssetSectionElem.innerHTML = sectionContent;
 			}
 			
 			function listTests() {
+				var sectionContent;
+				var individual_nr;
+				var aux;
+				var test_number;
+				var i;
+				
 				// Clear section
-				var sectionContent = "";
+				sectionContent = "";
 				testsSectionElem.innerHTML = sectionContent;
-				I = parseInt(InumberElem.value);
-				// Subtract 1 to start counting from 0
-				var x = I - 1;
-				var test_number = [];
-				for (var i = 0; i < D; i++) {
-					test_number[i] = ((x % L) + 1) + L * (D - (i + 1));
-					x = Math.floor(x / L);
+				individual_nr = parseInt(InumberElem.value);
+				aux = individual_nr - 1; // subtract 1 to start counting from 0
+				test_number = [];
+				for (i = 0; i < D; i++) {
+					test_number[i] = i * L + (aux % L) + 1;
+					aux = Math.floor(aux / L);
 				}
 				// Fill section
-				for (var i = (D - 1); i > 0; i--) {
+				for (i = 0; i < (D - 1); i++) {
 					sectionContent += test_number[i].toString(10) + "<br/>";
 				}
-				sectionContent += test_number[0].toString(10);
+				sectionContent += test_number[D - 1].toString(10);
 				testsSectionElem.innerHTML = sectionContent;
 			}
 			
 			function listIndividuals() {
+				var sectionContent;
+				var testNumber;
+				var iL;
+				var iD;
+				var latest;
+				var consecutives;
+				var iRow;
+				var individual_number;
+				var iDcoef;
+				var coef;
+				
 				// Clear section
-				var sectionContent = "";
+				sectionContent = "";
 				individualsSectionElem.innerHTML = sectionContent;
 				testNumber = parseInt(testNumbernumberElem.value);
-				// Get iD and iL from the analysis number
-				var iL = (testNumber - 1) % L;
-				var iD = D - 1 - Math.floor((testNumber - 1) / L);
-				var latest = 1;
-				var consecutives = 0;
-				for (var iFila = 0; iFila < (N / L); iFila++) {
-					var individual_number = 1; // count from 1
+				// Get iD and iL from the test number
+				iL = (testNumber - 1) % L;
+				iD = Math.floor((testNumber - 1) / L);
+				latest = 1;
+				consecutives = 0;
+				for (iRow = 0; iRow < (N / L); iRow++) {
+					individual_number = 1; // count from 1
 					for (iDcoef = 0; iDcoef < D; iDcoef++) {
-						var coef;
 						if (iDcoef != iD) {
 							if (iDcoef < iD) {
-								coef = Math.floor(iFila / Math.pow(L, iDcoef)) % L;
+								coef = Math.floor(iRow / Math.pow(L, iDcoef)) % L;
 							} else {
-								coef = Math.floor(iFila / Math.pow(L, iDcoef - 1)) % L;
+								coef = Math.floor(iRow / Math.pow(L, iDcoef - 1)) % L;
 							}
 							individual_number += coef * Math.pow(L, iDcoef);
 						} else {
 							individual_number += iL * Math.pow(L, iDcoef);
 						}
 					}
-					if (iFila == 0) {
+					if (iRow == 0) {
 						sectionContent += individual_number.toString(10);
 					} else {
-						if (iFila == (N / L - 1)) {
+						if (iRow == (N / L - 1)) {
 							if (consecutives > 0) {
 								sectionContent += "..." + individual_number.toString(10);
 								consecutives = 0;
@@ -460,24 +638,141 @@
 				individualsSectionElem.innerHTML = sectionContent;
 			}
 
-			function getIndividual() {
+			function getInfected() {
+				var spanContent;
+				var tuple;
+				var nr_of_dirs_with_several; // number of directions (positions) in which there are several positive slices (digits)
+				var maxsigma; // number of positive slices in the direction in which there are most
+				var minsigma; // used to check consistency
+				var i;
+				var j;
+				var digit;
+				var neg_pos_qty;
+				var neg_list;
+				var infected_qty;
+				var infected;
+				var accum;
+				var denom;
+				
 				// Clear span
-				individualSpanElem.innerHTML = "";
-				// Get coefficient and exponent from each test
-				var coef = [];
-				var expon = [];
-				for (var i = 0; i < D; i++) {
-					test_number = document.getElementById("test" + i).value;
-					coef[i] = (test_number - 1) % L;
-					expon[i] = D - 1 - Math.floor((test_number - 1) / L);
+				spanContent = "";
+				infectedSpanElem.innerHTML = spanContent;
+				// Read the list of positive tests, counting the directions with more than one positive slice, and counting the number of positive slices
+				// in the direction in which there are most
+				tuple = [];
+				nr_of_dirs_with_several = 0;
+				maxsigma = 0;
+				minsigma = L;
+				for (i = 0; i < D; i++) {
+					digit = [];
+					for (j = 0; j < L; j++) {
+						if (document.getElementById("test" + (i * L + j + 1)).checked) {
+							digit.push(j);
+						}
+					}
+					if (digit.length > 1) {
+						nr_of_dirs_with_several++;
+					}
+					if (digit.length > maxsigma) {
+						maxsigma = digit.length;
+					}
+					if (digit.length < minsigma) {
+						minsigma = digit.length;
+					}
+					tuple.push(digit);
 				}
-				// Calculate individual number
-				var individual_number = 1; // count from 1
-				for (var i = 0; i < D; i++) {
-					individual_number += coef[i] * Math.pow(L, expon[i]);
+				// Prepare message
+				if (nr_of_dirs_with_several > 1) {
+					if (curLang == "english") {
+						spanContent = "Perform another round of testing with subsamples from individuals: ";
+					}
+					if (curLang == "spanish") {
+						spanContent = "Pasar a una ronda de análisis adicional a los individuos: ";
+					}
+				} else {
+					if (minsigma == 0) {
+						if (maxsigma == 0) {
+							if (curLang == "english") {
+								spanContent = "No infected individuals.";
+							}
+							if (curLang == "spanish") {
+								spanContent = "No hay infectados.";
+							}
+						} else {
+							neg_pos_qty = 0;
+							neg_list = [];
+							for (i = 0; i < D; i++) {
+								if (tuple[i].length == 0) {
+									neg_pos_qty ++;
+									for (j = 0; j < L; j++) {
+										neg_list.push(L * i + j + 1);
+									}
+								}
+							}
+							if (curLang == "english") {
+								spanContent = "Inconsistent data: an infected individual produces a positive test in every direction, ";
+								spanContent += "but there are no positive tests in the ";
+								if (neg_pos_qty == 1) {
+									spanContent += "direction given by tests ";
+								} else {
+									spanContent += "directions given by tests ";
+								}
+							}
+							if (curLang == "spanish") {
+								spanContent = "Datos inconsistentes: un individuo infectado produce un análisis positivo en cada dirección, pero no hay ";
+								spanContent += "análisis positivos en "
+								if (neg_pos_qty == 1) {
+									spanContent += "la dirección dada por los análisis ";
+								} else {
+									spanContent += "las direcciones dadas por los análisis ";
+								}
+							}
+							spanContent += neg_list + ".";
+						}
+						// Output
+						infectedSpanElem.innerHTML = spanContent;
+						return;
+					} else {
+						if (maxsigma == 1) {
+							if (curLang == "english") {
+								spanContent = "1 infected individual: ";
+							}
+							if (curLang == "spanish") {
+								spanContent = "1 individuo infectado: ";
+							}
+						}
+						if (maxsigma > 1) {
+							if (curLang == "english") {
+								spanContent = maxsigma + " infected individuals: ";
+							}
+							if (curLang == "spanish") {
+								spanContent = maxsigma + " individuos infectados: ";
+							}
+						}
+					}
+				}
+				// List all numbers
+				// - number of possibly infected
+				infected_qty = 1;
+				for (i = 0; i < D; i++) {
+					infected_qty *= tuple[i].length;
+				}
+				// - identification numbers of possibly infected
+				infected = [];
+				for (i = 0; i < infected_qty; i++) {
+					accum = 0;
+					for (j = 0; j < D; j++) {
+						if (j == 0) {
+							denom = 1;
+						} else {
+							denom *= tuple[j - 1].length;
+						}
+						accum += Math.pow(L, j) * tuple[j][Math.floor(i / denom) % tuple[j].length];
+					}
+					infected.push(accum + 1); // counting from 1
 				}
 				// Output
-				individualSpanElem.innerHTML = individual_number;
+				infectedSpanElem.innerHTML = spanContent + infected + ".";
 			}
 			
 			function setLang(event, language) {
@@ -507,7 +802,8 @@
 						}
 					}
 					// Change the title
-					document.title = "Pooled testing using hypercubes";
+					document.title = title_en;
+					titleHElem.innerHTML = title_en;
 				}
 				if (language == "spanish") {
 					for (i = 0; i < englishcontent.length; i++) {
@@ -521,7 +817,8 @@
 						}
 					}
 					// Change the title
-					document.title = "Análisis con mezcla de muestras usando hipercubos";
+					document.title = title_es;
+					titleHElem.innerHTML = title_es;
 				}
 				// Set the button that was pressed as active
 				event.currentTarget.className += " active"; // note the space preceding 'active'
